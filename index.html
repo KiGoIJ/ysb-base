@@ -33,7 +33,6 @@
             padding: 24px;
             min-height: 100vh;
         }
-        /* ===== LAYOUT ===== */
         .app {
             max-width: 1400px;
             margin: 0 auto;
@@ -143,7 +142,7 @@
             background: #c0392b;
             color: white;
         }
-        /* ===== LOGIN FORM (inline in header) ===== */
+        /* ===== LOGIN FORM ===== */
         .login-form {
             display: flex;
             align-items: center;
@@ -237,7 +236,7 @@
             font-size: 0.8rem;
             color: var(--text-secondary);
         }
-        /* ===== TABLE / CARDS ===== */
+        /* ===== TABLE ===== */
         .list-container {
             padding: 20px 32px 32px;
             flex: 1;
@@ -557,7 +556,7 @@
             max-width: 100%;
             max-height: 100%;
         }
-        /* ===== PRINT STYLES (for modal preview) ===== */
+        /* ===== PRINT STAMP ===== */
         .print-stamp {
             display: inline-block;
             border: 3px double var(--primary);
@@ -586,7 +585,6 @@
             <div class="sub">Автоматизированный учёт личного состава</div>
         </div>
         <div class="header-actions">
-            <!-- Login form -->
             <div class="login-form" id="loginForm">
                 <input type="text" id="loginInput" placeholder="Логин">
                 <input type="password" id="passInput" placeholder="Пароль">
@@ -634,12 +632,9 @@
                         <th>Действия</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    <!-- rows rendered by JS -->
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
-        <!-- Pagination -->
         <div class="pagination" id="pagination">
             <button id="prevPage" onclick="changePage(-1)" disabled>‹ Назад</button>
             <span class="page-info" id="pageInfo">Страница 1 из 1</span>
@@ -655,9 +650,7 @@
             <h2 id="modalTitle">Личное дело</h2>
             <button class="close-btn" onclick="closeModal()">×</button>
         </div>
-        <div class="modal-body" id="modalBody">
-            <!-- dynamic -->
-        </div>
+        <div class="modal-body" id="modalBody"></div>
         <div class="modal-footer" id="modalFooter">
             <button class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
         </div>
@@ -746,7 +739,6 @@
             return matchSearch && matchStatus;
         });
 
-        // Sort
         filtered.sort((a, b) => {
             let valA = a[sortField] || '';
             let valB = b[sortField] || '';
@@ -799,7 +791,6 @@
             });
         }
 
-        // Pagination info
         document.getElementById('pageInfo').textContent = `Страница ${currentPage} из ${totalPages}`;
         document.getElementById('prevPage').disabled = currentPage <= 1;
         document.getElementById('nextPage').disabled = currentPage >= totalPages;
@@ -840,7 +831,7 @@
         currentDeloId = null;
     }
 
-    // ===== OPEN DELO (view) =====
+    // ===== OPEN DELO =====
     function openDelo(id) {
         const d = dela.find(x => x.id === id);
         if (!d) return;
@@ -880,7 +871,7 @@
         openModal(`Личное дело № ${d.id} · «${d.alias}»`, html, footer);
     }
 
-    // ===== EDIT DELO =====
+    // ===== EDIT =====
     function editDelo(id) {
         if (!canEdit()) return;
         const d = dela.find(x => x.id === id);
@@ -955,7 +946,6 @@
             saveDela();
             render();
             closeModal();
-            // reopen to show updated
             openDelo(d.id);
         }
     }
@@ -1038,10 +1028,12 @@
         closeModal();
     }
 
-    // ===== PRINT =====
+    // ===== UPDATED PRINT FUNCTION (A4 strict layout) =====
     function printDelo(id) {
         const d = dela.find(x => x.id === id);
         if (!d) return;
+
+        // Determine secrecy label
         let grif = '';
         switch (d.dop) {
             case 'ДСП': grif = 'Для служебного пользования'; break;
@@ -1050,54 +1042,224 @@
             case 'ОВ': grif = 'ОСОБОЙ ВАЖНОСТИ'; break;
             default: grif = 'ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ';
         }
-        const now = new Date();
         const outNum = `002-П(ОТ)/${d.id}`;
         const herbHtml = herbImage ?
             `<img src="${herbImage}" style="width:50px; height:auto; border:2px solid #222; border-radius:4px; background:white; padding:2px;" alt="Герб">` :
-            `<div style="width:50px; height:60px; border:2px solid #222; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:2.2em; background:white; color:#2d2d2d; font-weight:bold; line-height:1.2; text-align:center; padding:2px;">⚙</div>`;
+            `<div style="width:50px; height:60px; border:2px solid #222; border-radius:4px; background:white;"></div>`;
 
         const win = window.open('', '_blank', 'width=900,height=1100');
-        const doc = `
-<!DOCTYPE html>
+        const doc = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Личное дело №${d.id}</title>
 <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Times New Roman', serif; background: white; color: #1a1a1a; display: flex; justify-content: center; align-items: flex-start; padding: 20px; min-height: 100vh; }
-    .sheet { width: 210mm; min-height: 297mm; background: #ffffff; border: 1px solid #222; padding: 15mm 18mm 20mm 18mm; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-    .grif-block { position: absolute; top: 12mm; right: 18mm; text-align: right; font-weight: bold; font-size: 1em; letter-spacing: 1px; }
-    .grif-block .line { border: 2px solid #000; padding: 4px 12px; display: inline-block; margin-top: 4px; background: #fafafa; }
-    .grif-block .ex { font-size: 0.85em; font-weight: normal; margin-top: 6px; }
-    .grif-block .out { font-size: 0.8em; font-weight: normal; margin-top: 2px; }
-    .header-left { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
-    .gerb { flex-shrink: 0; width: 50px; height: 60px; border: 2px solid #222; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: white; padding: 2px; }
-    .org-info { font-size: 0.9em; line-height: 1.4; letter-spacing: 0.5px; }
-    .org-info .fsb { font-weight: bold; font-size: 1.1em; text-transform: uppercase; }
-    .org-info .ross { font-weight: normal; font-size: 0.95em; }
-    .org-info .address { font-size: 0.85em; color: #333; margin-top: 2px; }
-    .org-info .uprav { font-weight: bold; margin-top: 3px; font-size: 1em; text-transform: uppercase; letter-spacing: 1px; }
-    .doc-title { text-align: center; font-size: 1.8em; font-weight: bold; text-transform: uppercase; margin: 25px 0 20px 0; letter-spacing: 4px; border-bottom: 2px solid #222; padding-bottom: 10px; }
-    .doc-subtitle { text-align: center; font-size: 1.1em; margin-top: -10px; margin-bottom: 25px; font-weight: normal; letter-spacing: 2px; }
-    .content { flex: 1; font-size: 0.95em; line-height: 1.5; }
-    .section-title { font-weight: bold; font-size: 1.1em; margin: 20px 0 8px 0; border-bottom: 1px solid #888; padding-bottom: 3px; letter-spacing: 1px; }
-    .row { display: flex; align-items: baseline; margin: 6px 0; padding: 2px 0; }
-    .row .label { width: 200px; font-weight: bold; flex-shrink: 0; }
-    .row .value { flex: 1; border-bottom: 1px dotted #aaa; padding-left: 8px; min-height: 1.4em; }
-    .check-group { display: flex; flex-wrap: wrap; gap: 20px; margin: 6px 0 10px 0; }
-    .check-group span { border: 1px solid #555; padding: 2px 12px; background: #fafafa; font-size: 0.9em; }
-    .signature-area { margin-top: 35px; display: flex; justify-content: flex-end; align-items: flex-end; gap: 40px; border-top: 1px solid #888; padding-top: 20px; }
-    .signature-left { font-size: 0.85em; line-height: 1.6; }
-    .signature-right { text-align: center; width: 250px; }
-    .signature-right .line { border-top: 1px solid #000; padding-top: 6px; margin-top: 6px; font-size: 0.9em; }
-    .stamp-round { display: inline-block; border: 2px solid #222; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 0.6em; font-weight: bold; letter-spacing: 1px; background: #f5f0eb; margin-top: 10px; }
-    @media print { body { background: none; padding: 0; } .sheet { box-shadow: none; border: 1px solid #000; } }
+    body {
+        font-family: 'Times New Roman', 'Courier New', serif;
+        background: white;
+        color: #1a1a1a;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    .sheet {
+        width: 210mm;
+        min-height: 297mm;
+        background: #ffffff;
+        border: 1px solid #222;
+        padding: 15mm 20mm 20mm 20mm;
+        position: relative;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+    }
+    /* Гриф справа вверху */
+    .grif-block {
+        position: absolute;
+        top: 15mm;
+        right: 20mm;
+        text-align: right;
+        font-weight: bold;
+        font-size: 1em;
+        letter-spacing: 1px;
+    }
+    .grif-block .line {
+        border: 2px solid #000;
+        padding: 4px 12px;
+        display: inline-block;
+        margin-top: 4px;
+        background: #fafafa;
+    }
+    .grif-block .ex {
+        font-size: 0.85em;
+        font-weight: normal;
+        margin-top: 6px;
+    }
+    .grif-block .out {
+        font-size: 0.8em;
+        font-weight: normal;
+        margin-top: 2px;
+    }
+    /* Шапка слева */
+    .header-left {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 10px;
+        max-width: 70%;
+    }
+    .gerb {
+        flex-shrink: 0;
+        width: 50px;
+        height: 60px;
+        border: 2px solid #222;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        padding: 2px;
+    }
+    .org-info {
+        font-size: 0.9em;
+        line-height: 1.4;
+        letter-spacing: 0.5px;
+    }
+    .org-info .fsb {
+        font-weight: bold;
+        font-size: 1.1em;
+        text-transform: uppercase;
+    }
+    .org-info .ross {
+        font-weight: normal;
+        font-size: 0.95em;
+    }
+    .org-info .address {
+        font-size: 0.85em;
+        color: #333;
+        margin-top: 2px;
+    }
+    .org-info .uprav {
+        font-weight: bold;
+        margin-top: 3px;
+        font-size: 1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    /* Заголовок */
+    .doc-title {
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 25px 0 20px 0;
+        letter-spacing: 4px;
+        border-bottom: 2px solid #222;
+        padding-bottom: 10px;
+    }
+    .doc-subtitle {
+        text-align: center;
+        font-size: 1.1em;
+        margin-top: -10px;
+        margin-bottom: 25px;
+        font-weight: normal;
+        letter-spacing: 2px;
+    }
+    /* Контент */
+    .content {
+        flex: 1;
+        font-size: 0.95em;
+        line-height: 1.5;
+    }
+    .section-title {
+        font-weight: bold;
+        font-size: 1.1em;
+        margin: 20px 0 8px 0;
+        border-bottom: 1px solid #888;
+        padding-bottom: 3px;
+        letter-spacing: 1px;
+    }
+    .row {
+        display: flex;
+        align-items: baseline;
+        margin: 6px 0;
+        padding: 2px 0;
+    }
+    .row .label {
+        width: 200px;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    .row .value {
+        flex: 1;
+        border-bottom: 1px dotted #aaa;
+        padding-left: 8px;
+        min-height: 1.4em;
+    }
+    .check-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin: 6px 0 10px 0;
+    }
+    .check-group span {
+        border: 1px solid #555;
+        padding: 2px 12px;
+        background: #fafafa;
+        font-size: 0.9em;
+    }
+    .signature-area {
+        margin-top: 35px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        gap: 40px;
+        border-top: 1px solid #888;
+        padding-top: 20px;
+    }
+    .signature-left {
+        font-size: 0.85em;
+        line-height: 1.6;
+    }
+    .signature-right {
+        text-align: center;
+        width: 250px;
+    }
+    .signature-right .line {
+        border-top: 1px solid #000;
+        padding-top: 6px;
+        margin-top: 6px;
+        font-size: 0.9em;
+    }
+    .stamp-round {
+        display: inline-block;
+        border: 2px solid #222;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        font-size: 0.6em;
+        font-weight: bold;
+        letter-spacing: 1px;
+        background: #f5f0eb;
+        margin-top: 10px;
+    }
+    @media print {
+        body { background: none; padding: 0; }
+        .sheet { box-shadow: none; border: 1px solid #000; }
+    }
 </style>
 </head><body>
 <div class="sheet">
+    <!-- Гриф -->
     <div class="grif-block">
         <div class="line">${grif}</div>
         <div class="ex">Экз. № 1</div>
         <div class="out">Исходящий № ${outNum}</div>
     </div>
+
+    <!-- Шапка слева -->
     <div class="header-left">
         <div class="gerb">${herbHtml}</div>
         <div class="org-info">
@@ -1107,8 +1269,12 @@
             <div class="uprav">УПРАВЛЕНИЕ ПО ЛЕНИНГРАДСКОЙ ОБЛАСТИ И ПО ГОРОДУ ЗАРЕЧЕНСК</div>
         </div>
     </div>
+
+    <!-- Заголовок -->
     <div class="doc-title">ЛИЧНОЕ ДЕЛО № ${d.id}</div>
     <div class="doc-subtitle">(оперативный псевдоним «${d.alias}»)</div>
+
+    <!-- Основной блок -->
     <div class="content">
         <div class="section-title">I. ОБЩИЕ СВЕДЕНИЯ</div>
         <div class="row"><span class="label">Фамилия</span><span class="value">${d.surname}</span></div>
@@ -1116,6 +1282,7 @@
         <div class="row"><span class="label">Отчество</span><span class="value">${d.patronymic || ''}</span></div>
         <div class="row"><span class="label">Оперативный псевдоним</span><span class="value">${d.alias}</span></div>
         <div class="row"><span class="label">Личный номер (жетон)</span><span class="value">${d.personalNumber}</span></div>
+
         <div class="section-title">II. СЛУЖЕБНАЯ ИНФОРМАЦИЯ</div>
         <div class="row"><span class="label">Подразделение</span><span class="value">Седьмой отдел ТУ ФСБ</span></div>
         <div class="row"><span class="label">Должность</span><span class="value">${d.dolz}</span></div>
@@ -1127,13 +1294,18 @@
             <span>Наружное: [${d.qualSurveillance?'✓':' '}]</span>
             <span>Шифр.: [${d.qualCrypto?'✓':' '}]</span>
         </div>
+
         <div class="section-title">III. ОСОБЫЕ ОТМЕТКИ</div>
         <div class="row"><span class="label"> </span><span class="value" style="min-height:40px; border-bottom:1px solid #000;">${d.notes || '—'}</span></div>
+
         <div class="section-title">IV. РЕЗОЛЮЦИЯ</div>
         <div class="row"><span class="label"> </span><span class="value" style="min-height:40px; border-bottom:1px solid #000;">${d.resolution || '—'}</span></div>
+
         <div class="section-title">V. ОТМЕТКИ О ПРОХОЖДЕНИИ</div>
         <div class="row"><span class="label"> </span><span class="value" style="min-height:40px; border-bottom:1px solid #000;">${d.marks || '—'}</span></div>
     </div>
+
+    <!-- Подпись -->
     <div class="signature-area">
         <div class="signature-left"><div>«___» ______________ 20__ г.</div></div>
         <div class="signature-right">
@@ -1148,6 +1320,9 @@
 </body></html>`;
         win.document.write(doc);
         win.document.close();
+        // Автоматически открываем диалог печати
+        win.focus();
+        win.print();
     }
 
     // ===== HERB UPLOAD =====
@@ -1206,7 +1381,6 @@
     render();
     updateUIBasedOnRole();
 
-    // Handle Enter key for login
     document.getElementById('passInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') login();
     });
