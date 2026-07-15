@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АСУЛС – Модуль УСБ ТУ ФСБ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #0c0c0c;
+            color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            min-height: 100vh;
+            background-image: radial-gradient(rgba(0, 80, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #1a4d1a;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.15);
+            padding: 25px;
+            border-radius: 4px;
+        }
+        header {
+            text-align: center;
+            border-bottom: 1px dashed #1f5c1f;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        header h1 {
+            font-size: 1.6em;
+            letter-spacing: 2px;
+            color: #00cc00;
+            text-shadow: 0 0 8px #00aa00;
+            text-transform: uppercase;
+        }
+        header .subtitle {
+            font-size: 0.8em;
+            color: #5b8c5b;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+        .login-panel {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .login-panel input {
+            background: #111;
+            border: 1px solid #2e7d2e;
+            color: #33ff33;
+            padding: 6px 10px;
+            font-family: inherit;
+            font-size: 0.9em;
+            margin-right: 5px;
+            outline: none;
+            width: 160px;
+        }
+        .login-panel button {
+            background: #1a3a1a;
+            border: 1px solid #2e7d2e;
+            color: #b3ffb3;
+            padding: 6px 15px;
+            font-family: inherit;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .login-panel button:hover {
+            background: #2d5a2d;
+            box-shadow: 0 0 10px #00aa00;
+        }
+        .status {
+            margin-left: 15px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        .access-guest { color: #aaaa00; }
+        .access-usb { color: #00ff00; text-shadow: 0 0 5px green; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        th {
+            text-align: left;
+            background: #121f12;
+            padding: 10px 8px;
+            border-bottom: 1px solid #2a552a;
+            color: #b3ffb3;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        td {
+            padding: 9px 8px;
+            border-bottom: 1px dotted #1f441f;
+            color: #9fcf9f;
+        }
+        tr:hover td {
+            background: #0f280f;
+        }
+        .actions button {
+            background: none;
+            border: 1px solid #2e7d2e;
+            color: #b3ffb3;
+            font-family: inherit;
+            padding: 4px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .actions button:hover {
+            background: #1f4f1f;
+            box-shadow: 0 0 6px green;
+        }
+        .add-btn {
+            margin: 20px 0 10px;
+            display: inline-block;
+            background: #0a2f0a;
+            border: 1px solid #2e7d2e;
+            color: #b3ffb3;
+            padding: 8px 20px;
+            font-family: inherit;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .add-btn:hover {
+            background: #1f4f1f;
+            box-shadow: 0 0 12px green;
+        }
+        /* модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            background: #0a0f0a;
+            margin: 3% auto;
+            padding: 25px;
+            border: 1px solid #2e7d2e;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            color: #b3ffb3;
+            box-shadow: 0 0 30px rgba(0,255,0,0.3);
+            position: relative;
+            font-size: 0.9em;
+        }
+        .modal-content h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px dashed #2a552a;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #5b8c5b;
+        }
+        .close:hover { color: #ff5555; }
+        .field {
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .field label {
+            width: 200px;
+            color: #6aa66a;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .field span, .field input, .field textarea, .field select {
+            flex: 1;
+            background: #0c1a0c;
+            border: 1px solid #1f4f1f;
+            color: #b3ffb3;
+            padding: 5px 8px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+        .field textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .stamp {
+            display: inline-block;
+            border: 2px solid #aa0000;
+            color: #ff4444;
+            padding: 3px 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transform: rotate(-5deg);
+            margin: 10px 0;
+            opacity: 0.9;
+        }
+        .gost-button {
+            background: #1a2e1a;
+            border: 1px solid #3d7a3d;
+            color: #b3ffb3;
+            padding: 8px 18px;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
+        .gost-button:hover { background: #2d5a2d; }
+        hr {
+            border-color: #1f4f1f;
+            margin: 20px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>▮ АСУЛС – Модуль УСБ ТУ ФСБ</h1>
+        <div class="subtitle">Автоматизированная система учёта личного состава · Гриф: Секретно</div>
+    </header>
+
+    <div class="login-panel">
+        <input type="password" id="passInput" placeholder="Код доступа УСБ">
+        <button onclick="login()">Войти</button>
+        <span id="loginStatus" class="status access-guest">● ГОСТЬ (ограниченный доступ)</span>
+        <button style="margin-left:15px;" onclick="logout()" id="logoutBtn" class="hidden">Выйти</button>
+    </div>
+
+    <div id="app">
+        <table id="tableDela">
+            <thead>
+                <tr>
+                    <th>№ дела</th>
+                    <th>Псевдоним</th>
+                    <th>Ф.И.О.</th>
+                    <th>Допуск</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="add-btn hidden" id="addBtn" onclick="openAddModal()">＋ Зарегистрировать личное дело</button>
+    </div>
+</div>
+
+<!-- Модальное окно просмотра/редактирования -->
+<div id="modalDela" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">Личное дело №</h2>
+        <div id="modalBody"></div>
+        <div id="modalEditSection" class="hidden">
+            <hr>
+            <button class="gost-button" onclick="saveEdit()">Сохранить изменения</button>
+            <button class="gost-button" style="background:#3d1a1a; border-color:#7a3d3d;" onclick="deleteDelo()">Удалить дело</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h2>Регистрация нового личного дела</h2>
+        <div id="addForm"></div>
+        <button class="gost-button" onclick="createDelo()">Зарегистрировать</button>
+    </div>
+</div>
+
+<script>
+    // ---- Глобальные переменные ----
+    const USB_PASSWORD = "Агат2026";   // пароль для доступа УСБ
+    let isUSB = false;
+    let currentDeloId = null;
+    let dela = [];                     // массив объектов дел
+
+    // Шаблон демо-данных (если localStorage пуст)
+    const demoNames = [
+        {id:'001', alias:'Агат', name:'Зимин А.В.', birth:1985, dolz:'Ст. оперуполномоченный', dop:'Секретно', status:'Благонадёжен', notes:'Рекомендован к повышению.', kompromat:'Не обнаружен.'},
+        {id:'002', alias:'Титан', name:'Волков С.П.', birth:1979, dolz:'Начальник отдела', dop:'Сов. секретно', status:'Требует внимания', notes:'Замечены неформальные контакты.', kompromat:'Фото с закрытой встречи (приобщено).'},
+        {id:'003', alias:'Заря', name:'Котова Е.Н.', birth:1990, dolz:'Оперуполномоченный', dop:'Секретно', status:'Дискредитирован', notes:'Финансовые нарушения.', kompromat:'Выписка со счетов.'}
+    ];
+
+    // ---- Инициализация ----
+    function loadDela() {
+        const stored = localStorage.getItem('delaUSB');
+        if (stored) {
+            dela = JSON.parse(stored);
+        } else {
+            dela = demoNames.map(d => ({...d}));
+            saveDela();
+        }
+    }
+    function saveDela() {
+        localStorage.setItem('delaUSB', JSON.stringify(dela));
+    }
+
+    // Отрисовка таблицы
+    function renderTable() {
+        const tbody = document.querySelector('#tableDela tbody');
+        tbody.innerHTML = '';
+        dela.forEach(d => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${d.id}</td>
+                <td><strong>${d.alias}</strong></td>
+                <td>${d.name}</td>
+                <td>${d.dop}</td>
+                <td>${statusBadge(d.status)}</td>
+                <td class="actions">
+                    <button onclick="openDelo('${d.id}')">Просмотр</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function statusBadge(status) {
+        const map = {
+            'Благонадёжен': '<span style="color:#55cc55;">● Благонадёжен</span>',
+            'Требует внимания': '<span style="color:#cccc00;">● Требует внимания</span>',
+            'Дискредитирован': '<span style="color:#cc5555;">● Дискредитирован</span>'
+        };
+        return map[status] || status;
+    }
+
+    // ---- Модальное окно просмотра ----
+    function openDelo(id) {
+        const delo = dela.find(d => d.id === id);
+        if (!delo) return;
+        currentDeloId = id;
+        document.getElementById('modalTitle').textContent = `Личное дело № ${delo.id} · псевдоним «${delo.alias}»`;
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `
+            <div class="stamp">Гриф: ${delo.dop.toUpperCase()}</div>
+            <div class="field"><label>Ф.И.О.:</label><span>${delo.name}</span></div>
+            <div class="field"><label>Год рождения:</label><span>${delo.birth}</span></div>
+            <div class="field"><label>Должность:</label><span>${delo.dolz}</span></div>
+            <div class="field"><label>Уровень допуска:</label><span>${delo.dop}</span></div>
+            <div class="field"><label>Статус:</label><span>${statusBadge(delo.status)}</span></div>
+            <div class="field"><label>Особые отметки:</label><span>${delo.notes || '—'}</span></div>
+            <div class="field"><label>Компромат:</label><span>${delo.kompromat || '—'}</span></div>
+            <div class="field"><label>Резолюция УСБ:</label><span>${delo.resolution || 'Без замечаний.'}</span></div>
+        `;
+        // Если УСБ — показать форму редактирования
+        const editSection = document.getElementById('modalEditSection');
+        if (isUSB) {
+            editSection.classList.remove('hidden');
+            // Заполним скрытые поля для редактирования (откроем в том же окне или через редактирование полей)
+            // Но для простоты сделаем кнопку "Редактировать", которая превращает просмотр в форму
+            // Удобнее сделать отдельное модальное окно редактирования, но для компактности добавим inline-редактирование по клику на "Изменить"
+            // Я выберу подход: кнопка "Редактировать" внизу, которая заменяет просмотр на форму.
+        } else {
+            editSection.classList.add('hidden');
+        }
+        document.getElementById('modalDela').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('modalDela').style.display = 'none';
+        currentDeloId = null;
+    }
+
+    // ---- Режим УСБ: редактирование и удаление ----
+    function enableEditMode() {
+        // Превращает поля просмотра в поля ввода (упрощённо)
+        if (!isUSB || !currentDeloId) return;
+        const delo = dela.find(d => d.id === currentDeloId);
+        if (!delo) return;
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `
+            <div class="field"><label>Ф.И.О.:</label><input id="editName" value="${delo.name}"></div>
+            <div class="field"><label>Год рождения:</label><input id="editBirth" value="${delo.birth}"></div>
+            <div class="field"><label>Должность:</label><input id="editDolz" value="${delo.dolz}"></div>
+            <div class="field"><label>Допуск:</label><select id="editDop">
+                <option ${delo.dop==='ДСП'?'selected':''}>ДСП</option>
+                <option ${delo.dop==='Секретно'?'selected':''}>Секретно</option>
+                <option ${delo.dop==='Сов. секретно'?'selected':''}>Сов. секретно</option>
+                <option ${delo.dop==='ОВ'?'selected':''}>ОВ</option>
+            </select></div>
+            <div class="field"><label>Статус:</label><select id="editStatus">
+                <option ${delo.status==='Благонадёжен'?'selected':''}>Благонадёжен</option>
+                <option ${delo.status==='Требует внимания'?'selected':''}>Требует внимания</option>
+                <option ${delo.status==='Дискредитирован'?'selected':''}>Дискредитирован</option>
+            </select></div>
+            <div class="field"><label>Особые отметки:</label><textarea id="editNotes">${delo.notes || ''}</textarea></div>
+            <div class="field"><label>Компромат:</label><textarea id="editKompromat">${delo.kompromat || ''}</textarea></div>
+            <div class="field"><label>Резолюция УСБ:</label><textarea id="editResolution">${delo.resolution || ''}</textarea></div>
+        `;
+    }
+
+    function saveEdit() {
+        if (!isUSB || !currentDeloId) return;
+        const delo = dela.find(d => d.id === currentDeloId);
+        if (!delo) return;
+        // Считываем из input'ов, если они есть (если режим редактирования активирован)
+        const nameEl = document.getElementById('editName');
+        if (nameEl) {
+            delo.name = nameEl.value;
+            delo.birth = document.getElementById('editBirth').value;
+            delo.dolz = document.getElementById('editDolz').value;
+            delo.dop = document.getElementById('editDop').value;
+            delo.status = document.getElementById('editStatus').value;
+            delo.notes = document.getElementById('editNotes').value;
+            delo.kompromat = document.getElementById('editKompromat').value;
+            delo.resolution = document.getElementById('editResolution').value;
+        }
+        saveDela();
+        renderTable();
+        closeModal();
+        alert('Личное дело обновлено.');
+    }
+
+    function deleteDelo() {
+        if (!isUSB || !currentDeloId) return;
+        if (!confirm('Удалить личное дело №' + currentDeloId + ' безвозвратно?')) return;
+        dela = dela.filter(d => d.id !== currentDeloId);
+        saveDela();
+        renderTable();
+        closeModal();
+    }
+
+    // Кнопка "Редактировать" (добавим в просмотр для УСБ)
+    function addEditButton() {
+        const editSection = document.getElementById('modalEditSection');
+        if (isUSB && currentDeloId) {
+            editSection.innerHTML = `
+                <button class="gost-button" onclick="enableEditMode()">✎ Редактировать</button>
+                <button class="gost-button" style="background:#3d1a1a; border-color:#7a3d3d;" onclick="deleteDelo()">Удалить</button>
+            `;
+            editSection.classList.remove('hidden');
+        }
+    }
+
+    // Переопределим openDelo, чтобы добавлять кнопку
+    const originalOpenDelo = openDelo;
+    openDelo = function(id) {
+        originalOpenDelo(id);
+        addEditButton();
+    };
+
+    // ---- Добавление нового дела ----
+    function openAddModal() {
+        if (!isUSB) return;
+        document.getElementById('addForm').innerHTML = `
+            <div class="field"><label>Номер дела:</label><input id="newId" placeholder="001"></div>
+            <div class="field"><label>Псевдоним:</label><input id="newAlias" placeholder="Агат"></div>
+            <div class="field"><label>Ф.И.О.:</label><input id="newName" placeholder="Зимин А.В."></div>
+            <div class="field"><label>Год рождения:</label><input id="newBirth" placeholder="1985"></div>
+            <div class="field"><label>Должность:</label><input id="newDolz" placeholder="Ст. оперуполномоченный"></div>
+            <div class="field"><label>Допуск:</label><select id="newDop">
+                <option>ДСП</option><option selected>Секретно</option><option>Сов. секретно</option><option>ОВ</option>
+            </select></div>
+            <div class="field"><label>Статус:</label><select id="newStatus">
+                <option selected>Благонадёжен</option><option>Требует внимания</option><option>Дискредитирован</option>
+            </select></div>
+            <div class="field"><label>Особые отметки:</label><textarea id="newNotes"></textarea></div>
+            <div class="field"><label>Компромат:</label><textarea id="newKompromat"></textarea></div>
+            <div class="field"><label>Резолюция УСБ:</label><textarea id="newResolution">Без замечаний.</textarea></div>
+        `;
+        document.getElementById('addModal').style.display = 'block';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addModal').style.display = 'none';
+    }
+
+    function createDelo() {
+        const id = document.getElementById('newId').value.trim();
+        if (!id) { alert('Введите номер дела'); return; }
+        if (dela.find(d => d.id === id)) { alert('Дело с таким номером уже существует'); return; }
+        const newDelo = {
+            id: id,
+            alias: document.getElementById('newAlias').value.trim(),
+            name: document.getElementById('newName').value.trim(),
+            birth: document.getElementById('newBirth').value.trim(),
+            dolz: document.getElementById('newDolz').value.trim(),
+            dop: document.getElementById('newDop').value,
+            status: document.getElementById('newStatus').value,
+            notes: document.getElementById('newNotes').value.trim(),
+            kompromat: document.getElementById('newKompromat').value.trim(),
+            resolution: document.getElementById('newResolution').value.trim()
+        };
+        dela.push(newDelo);
+        saveDela();
+        renderTable();
+        closeAddModal();
+    }
+
+    // ---- Аутентификация ----
+    function login() {
+        const pass = document.getElementById('passInput').value.trim();
+        if (pass === USB_PASSWORD) {
+            isUSB = true;
+            document.getElementById('loginStatus').textContent = '● УСБ (полный доступ)';
+            document.getElementById('loginStatus').className = 'status access-usb';
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('addBtn').classList.remove('hidden');
+            document.getElementById('passInput').value = '';
+            renderTable(); // на случай если уже открыты кнопки
+        } else {
+            alert('Неверный код доступа');
+        }
+    }
+
+    function logout() {
+        isUSB = false;
+        document.getElementById('loginStatus').textContent = '● ГОСТЬ (ограниченный доступ)';
+        document.getElementById('loginStatus').className = 'status access-guest';
+        document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('addBtn').classList.add('hidden');
+        document.getElementById('passInput').value = '';
+        closeModal();
+        closeAddModal();
+        renderTable();
+    }
+
+    // Закрытие модалок по клику вне окна
+    window.onclick = function(event) {
+        if (event.target === document.getElementById('modalDela')) closeModal();
+        if (event.target === document.getElementById('addModal')) closeAddModal();
+    }
+
+    // Старт
+    loadDela();
+    renderTable();
+</script>
+</body>
+</html>
