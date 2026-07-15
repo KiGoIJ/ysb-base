@@ -5,249 +5,305 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>АСУЛС – Модуль УСБ ТУ ФСБ</title>
     <style>
+        :root {
+            --bg: #F6F2EE;
+            --surface: #FFFFFF;
+            --border: #B3B9C1;
+            --text: #323841;
+            --text-secondary: #77726E;
+            --accent: #323841;
+            --accent-light: #CACBCD;
+            --shadow: rgba(50, 56, 65, 0.08);
+            --stamp-color: #323841;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
-            background-color: #0c0c0c;
-            color: #33ff33;
+            background-color: var(--bg);
+            color: var(--text);
             font-family: 'Courier New', Courier, monospace;
-            padding: 20px;
+            padding: 30px 20px;
             min-height: 100vh;
-            background-image: radial-gradient(rgba(0, 80, 0, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-image: linear-gradient(rgba(50,56,65,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(50,56,65,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid #1a4d1a;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.15);
-            padding: 25px;
-            border-radius: 4px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px var(--shadow);
+            padding: 30px 35px;
+            border-radius: 2px;
         }
         header {
             text-align: center;
-            border-bottom: 1px dashed #1f5c1f;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
         header h1 {
-            font-size: 1.6em;
-            letter-spacing: 2px;
-            color: #00cc00;
-            text-shadow: 0 0 8px #00aa00;
+            font-size: 1.7em;
+            letter-spacing: 3px;
+            color: var(--accent);
             text-transform: uppercase;
+            font-weight: 700;
         }
         header .subtitle {
-            font-size: 0.8em;
-            color: #5b8c5b;
-            margin-top: 5px;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 6px;
             text-transform: uppercase;
+            letter-spacing: 2px;
         }
         .login-panel {
             text-align: right;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
         }
         .login-panel input {
-            background: #111;
-            border: 1px solid #2e7d2e;
-            color: #33ff33;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
             padding: 6px 10px;
             font-family: inherit;
             font-size: 0.9em;
-            margin-right: 5px;
             outline: none;
-            width: 160px;
+            width: 180px;
+            border-radius: 2px;
+        }
+        .login-panel input:focus {
+            border-color: var(--accent);
         }
         .login-panel button {
-            background: #1a3a1a;
-            border: 1px solid #2e7d2e;
-            color: #b3ffb3;
-            padding: 6px 15px;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #FFFFFF;
+            padding: 6px 18px;
             font-family: inherit;
             font-size: 0.9em;
             cursor: pointer;
             transition: 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            border-radius: 2px;
         }
         .login-panel button:hover {
-            background: #2d5a2d;
-            box-shadow: 0 0 10px #00aa00;
+            background: #1d2229;
+            border-color: #1d2229;
         }
         .status {
-            margin-left: 15px;
             font-weight: bold;
             font-size: 0.85em;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 2px;
+            background: var(--bg);
+            border: 1px solid var(--border);
         }
-        .access-guest { color: #aaaa00; }
-        .access-usb { color: #00ff00; text-shadow: 0 0 5px green; }
+        .access-guest { color: var(--text-secondary); }
+        .access-usb { color: var(--accent); background: #EAE9E7; }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
             font-size: 0.9em;
         }
         th {
             text-align: left;
-            background: #121f12;
-            padding: 10px 8px;
-            border-bottom: 1px solid #2a552a;
-            color: #b3ffb3;
+            background: var(--bg);
+            padding: 12px 10px;
+            border-bottom: 2px solid var(--accent);
+            color: var(--accent);
             letter-spacing: 1px;
             text-transform: uppercase;
+            font-size: 0.85em;
         }
         td {
-            padding: 9px 8px;
-            border-bottom: 1px dotted #1f441f;
-            color: #9fcf9f;
+            padding: 10px 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
         }
         tr:hover td {
-            background: #0f280f;
+            background: #F0EEEA;
         }
         .actions button {
-            background: none;
-            border: 1px solid #2e7d2e;
-            color: #b3ffb3;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
             font-family: inherit;
-            padding: 4px 10px;
-            margin-right: 5px;
+            padding: 4px 12px;
+            margin-right: 6px;
             cursor: pointer;
             font-size: 0.75em;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 2px;
             transition: 0.2s;
         }
         .actions button:hover {
-            background: #1f4f1f;
-            box-shadow: 0 0 6px green;
+            background: var(--accent-light);
+            border-color: var(--accent);
         }
         .add-btn {
-            margin: 20px 0 10px;
+            margin: 18px 0 8px;
             display: inline-block;
-            background: #0a2f0a;
-            border: 1px solid #2e7d2e;
-            color: #b3ffb3;
-            padding: 8px 20px;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #FFFFFF;
+            padding: 8px 22px;
             font-family: inherit;
             font-size: 0.9em;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
+            border-radius: 2px;
         }
         .add-btn:hover {
-            background: #1f4f1f;
-            box-shadow: 0 0 12px green;
+            background: #1d2229;
+            border-color: #1d2229;
         }
-        /* модальное окно */
+        /* Печать (штамп) */
+        .stamp {
+            display: inline-block;
+            border: 3px double var(--stamp-color);
+            color: var(--stamp-color);
+            padding: 6px 20px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transform: rotate(-3deg);
+            opacity: 0.85;
+            margin: 12px 0;
+            font-size: 1em;
+            background: rgba(50,56,65,0.02);
+            border-radius: 4px;
+            box-shadow: 0 0 0 1px var(--stamp-color);
+        }
+
+        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
             z-index: 100;
             left: 0; top: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8);
+            background-color: rgba(50,56,65,0.5);
         }
         .modal-content {
-            background: #0a0f0a;
+            background: var(--surface);
             margin: 3% auto;
-            padding: 25px;
-            border: 1px solid #2e7d2e;
+            padding: 30px;
+            border: 1px solid var(--border);
             width: 90%;
             max-width: 650px;
             max-height: 85vh;
             overflow-y: auto;
-            color: #b3ffb3;
-            box-shadow: 0 0 30px rgba(0,255,0,0.3);
+            color: var(--text);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
             position: relative;
             font-size: 0.9em;
+            border-radius: 2px;
         }
         .modal-content h2 {
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-bottom: 1px dashed #2a552a;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            color: var(--accent);
         }
         .close {
             position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 1.5em;
+            right: 18px;
+            top: 14px;
+            font-size: 1.6em;
             cursor: pointer;
-            color: #5b8c5b;
+            color: var(--text-secondary);
+            line-height: 1;
         }
-        .close:hover { color: #ff5555; }
+        .close:hover { color: var(--accent); }
         .field {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             display: flex;
             flex-wrap: wrap;
+            align-items: baseline;
         }
         .field label {
-            width: 200px;
-            color: #6aa66a;
+            width: 190px;
+            color: var(--text-secondary);
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
+            font-size: 0.85em;
+            text-transform: uppercase;
         }
         .field span, .field input, .field textarea, .field select {
             flex: 1;
-            background: #0c1a0c;
-            border: 1px solid #1f4f1f;
-            color: #b3ffb3;
-            padding: 5px 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 10px;
             font-family: inherit;
             font-size: 0.9em;
+            border-radius: 2px;
         }
         .field textarea {
             resize: vertical;
-            min-height: 60px;
-        }
-        .stamp {
-            display: inline-block;
-            border: 2px solid #aa0000;
-            color: #ff4444;
-            padding: 3px 12px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            transform: rotate(-5deg);
-            margin: 10px 0;
-            opacity: 0.9;
+            min-height: 65px;
         }
         .gost-button {
-            background: #1a2e1a;
-            border: 1px solid #3d7a3d;
-            color: #b3ffb3;
-            padding: 8px 18px;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #FFFFFF;
+            padding: 8px 20px;
             font-family: inherit;
             cursor: pointer;
             text-transform: uppercase;
-            margin-top: 15px;
+            letter-spacing: 1px;
+            margin-top: 12px;
+            margin-right: 10px;
+            border-radius: 2px;
         }
-        .gost-button:hover { background: #2d5a2d; }
+        .gost-button:hover {
+            background: #1d2229;
+        }
         hr {
-            border-color: #1f4f1f;
-            margin: 20px 0;
+            border-color: var(--border);
+            margin: 25px 0;
         }
         .hidden {
             display: none;
         }
+        .status-badge {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .status-badge.blag { color: var(--text); }
+        .status-badge.attention { color: #5f5b57; font-style: italic; }
+        .status-badge.diskred { color: #8b8680; text-decoration: line-through; }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
         <h1>▮ АСУЛС – Модуль УСБ ТУ ФСБ</h1>
-        <div class="subtitle">Автоматизированная система учёта личного состава · Гриф: Секретно</div>
+        <div class="subtitle">Автоматизированная система учёта личного состава · Совершенно секретно</div>
     </header>
 
     <div class="login-panel">
         <input type="password" id="passInput" placeholder="Код доступа УСБ">
         <button onclick="login()">Войти</button>
         <span id="loginStatus" class="status access-guest">● ГОСТЬ (ограниченный доступ)</span>
-        <button style="margin-left:15px;" onclick="logout()" id="logoutBtn" class="hidden">Выйти</button>
+        <button id="logoutBtn" class="hidden" onclick="logout()">Выйти</button>
     </div>
 
     <div id="app">
@@ -264,7 +320,7 @@
             </thead>
             <tbody></tbody>
         </table>
-        <button class="add-btn hidden" id="addBtn" onclick="openAddModal()">＋ Зарегистрировать личное дело</button>
+        <button class="add-btn hidden" id="addBtn" onclick="openAddModal()">＋ Зарегистрировать дело</button>
     </div>
 </div>
 
@@ -274,11 +330,7 @@
         <span class="close" onclick="closeModal()">&times;</span>
         <h2 id="modalTitle">Личное дело №</h2>
         <div id="modalBody"></div>
-        <div id="modalEditSection" class="hidden">
-            <hr>
-            <button class="gost-button" onclick="saveEdit()">Сохранить изменения</button>
-            <button class="gost-button" style="background:#3d1a1a; border-color:#7a3d3d;" onclick="deleteDelo()">Удалить дело</button>
-        </div>
+        <div id="modalEditSection" class="hidden"></div>
     </div>
 </div>
 
@@ -293,20 +345,17 @@
 </div>
 
 <script>
-    // ---- Глобальные переменные ----
-    const USB_PASSWORD = "Агат2026";   // пароль для доступа УСБ
+    const USB_PASSWORD = "Агат2026";
     let isUSB = false;
     let currentDeloId = null;
-    let dela = [];                     // массив объектов дел
+    let dela = [];
 
-    // Шаблон демо-данных (если localStorage пуст)
     const demoNames = [
-        {id:'001', alias:'Агат', name:'Зимин А.В.', birth:1985, dolz:'Ст. оперуполномоченный', dop:'Секретно', status:'Благонадёжен', notes:'Рекомендован к повышению.', kompromat:'Не обнаружен.'},
-        {id:'002', alias:'Титан', name:'Волков С.П.', birth:1979, dolz:'Начальник отдела', dop:'Сов. секретно', status:'Требует внимания', notes:'Замечены неформальные контакты.', kompromat:'Фото с закрытой встречи (приобщено).'},
-        {id:'003', alias:'Заря', name:'Котова Е.Н.', birth:1990, dolz:'Оперуполномоченный', dop:'Секретно', status:'Дискредитирован', notes:'Финансовые нарушения.', kompromat:'Выписка со счетов.'}
+        {id:'001', alias:'Агат', name:'Зимин А.В.', birth:1985, dolz:'Ст. оперуполномоченный', dop:'Секретно', status:'Благонадёжен', notes:'Рекомендован к повышению.', kompromat:'Не обнаружен.', resolution:'Без замечаний.'},
+        {id:'002', alias:'Титан', name:'Волков С.П.', birth:1979, dolz:'Начальник отдела', dop:'Сов. секретно', status:'Требует внимания', notes:'Замечены неформальные контакты.', kompromat:'Фото с закрытой встречи.', resolution:'Установить наблюдение.'},
+        {id:'003', alias:'Заря', name:'Котова Е.Н.', birth:1990, dolz:'Оперуполномоченный', dop:'Секретно', status:'Дискредитирован', notes:'Финансовые нарушения.', kompromat:'Выписка со счетов.', resolution:'Отстранить от оперативной работы.'}
     ];
 
-    // ---- Инициализация ----
     function loadDela() {
         const stored = localStorage.getItem('delaUSB');
         if (stored) {
@@ -320,7 +369,14 @@
         localStorage.setItem('delaUSB', JSON.stringify(dela));
     }
 
-    // Отрисовка таблицы
+    function statusBadge(status) {
+        let cls = '';
+        if (status === 'Благонадёжен') cls = 'blag';
+        else if (status === 'Требует внимания') cls = 'attention';
+        else if (status === 'Дискредитирован') cls = 'diskred';
+        return `<span class="status-badge ${cls}">${status}</span>`;
+    }
+
     function renderTable() {
         const tbody = document.querySelector('#tableDela tbody');
         tbody.innerHTML = '';
@@ -340,16 +396,6 @@
         });
     }
 
-    function statusBadge(status) {
-        const map = {
-            'Благонадёжен': '<span style="color:#55cc55;">● Благонадёжен</span>',
-            'Требует внимания': '<span style="color:#cccc00;">● Требует внимания</span>',
-            'Дискредитирован': '<span style="color:#cc5555;">● Дискредитирован</span>'
-        };
-        return map[status] || status;
-    }
-
-    // ---- Модальное окно просмотра ----
     function openDelo(id) {
         const delo = dela.find(d => d.id === id);
         if (!delo) return;
@@ -357,7 +403,7 @@
         document.getElementById('modalTitle').textContent = `Личное дело № ${delo.id} · псевдоним «${delo.alias}»`;
         const body = document.getElementById('modalBody');
         body.innerHTML = `
-            <div class="stamp">Гриф: ${delo.dop.toUpperCase()}</div>
+            <div class="stamp">${delo.dop.toUpperCase()}</div>
             <div class="field"><label>Ф.И.О.:</label><span>${delo.name}</span></div>
             <div class="field"><label>Год рождения:</label><span>${delo.birth}</span></div>
             <div class="field"><label>Должность:</label><span>${delo.dolz}</span></div>
@@ -367,14 +413,13 @@
             <div class="field"><label>Компромат:</label><span>${delo.kompromat || '—'}</span></div>
             <div class="field"><label>Резолюция УСБ:</label><span>${delo.resolution || 'Без замечаний.'}</span></div>
         `;
-        // Если УСБ — показать форму редактирования
         const editSection = document.getElementById('modalEditSection');
         if (isUSB) {
+            editSection.innerHTML = `
+                <button class="gost-button" onclick="enableEditMode()">✎ Редактировать</button>
+                <button class="gost-button" style="background:#5a5552; border-color:#5a5552;" onclick="deleteDelo()">Удалить</button>
+            `;
             editSection.classList.remove('hidden');
-            // Заполним скрытые поля для редактирования (откроем в том же окне или через редактирование полей)
-            // Но для простоты сделаем кнопку "Редактировать", которая превращает просмотр в форму
-            // Удобнее сделать отдельное модальное окно редактирования, но для компактности добавим inline-редактирование по клику на "Изменить"
-            // Я выберу подход: кнопка "Редактировать" внизу, которая заменяет просмотр на форму.
         } else {
             editSection.classList.add('hidden');
         }
@@ -386,9 +431,7 @@
         currentDeloId = null;
     }
 
-    // ---- Режим УСБ: редактирование и удаление ----
     function enableEditMode() {
-        // Превращает поля просмотра в поля ввода (упрощённо)
         if (!isUSB || !currentDeloId) return;
         const delo = dela.find(d => d.id === currentDeloId);
         if (!delo) return;
@@ -418,7 +461,6 @@
         if (!isUSB || !currentDeloId) return;
         const delo = dela.find(d => d.id === currentDeloId);
         if (!delo) return;
-        // Считываем из input'ов, если они есть (если режим редактирования активирован)
         const nameEl = document.getElementById('editName');
         if (nameEl) {
             delo.name = nameEl.value;
@@ -445,26 +487,6 @@
         closeModal();
     }
 
-    // Кнопка "Редактировать" (добавим в просмотр для УСБ)
-    function addEditButton() {
-        const editSection = document.getElementById('modalEditSection');
-        if (isUSB && currentDeloId) {
-            editSection.innerHTML = `
-                <button class="gost-button" onclick="enableEditMode()">✎ Редактировать</button>
-                <button class="gost-button" style="background:#3d1a1a; border-color:#7a3d3d;" onclick="deleteDelo()">Удалить</button>
-            `;
-            editSection.classList.remove('hidden');
-        }
-    }
-
-    // Переопределим openDelo, чтобы добавлять кнопку
-    const originalOpenDelo = openDelo;
-    openDelo = function(id) {
-        originalOpenDelo(id);
-        addEditButton();
-    };
-
-    // ---- Добавление нового дела ----
     function openAddModal() {
         if (!isUSB) return;
         document.getElementById('addForm').innerHTML = `
@@ -512,7 +534,6 @@
         closeAddModal();
     }
 
-    // ---- Аутентификация ----
     function login() {
         const pass = document.getElementById('passInput').value.trim();
         if (pass === USB_PASSWORD) {
@@ -522,7 +543,7 @@
             document.getElementById('logoutBtn').classList.remove('hidden');
             document.getElementById('addBtn').classList.remove('hidden');
             document.getElementById('passInput').value = '';
-            renderTable(); // на случай если уже открыты кнопки
+            renderTable();
         } else {
             alert('Неверный код доступа');
         }
@@ -540,13 +561,11 @@
         renderTable();
     }
 
-    // Закрытие модалок по клику вне окна
     window.onclick = function(event) {
         if (event.target === document.getElementById('modalDela')) closeModal();
         if (event.target === document.getElementById('addModal')) closeAddModal();
     }
 
-    // Старт
     loadDela();
     renderTable();
 </script>
