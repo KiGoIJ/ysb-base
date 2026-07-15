@@ -144,6 +144,21 @@
         .status-badge.blag { color: var(--text); }
         .status-badge.attention { color: #5f5b57; font-style: italic; }
         .status-badge.diskred { color: #8b8680; text-decoration: line-through; }
+
+        /* Дополнительный стиль для загрузки герба */
+        .upload-herb {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85em;
+        }
+        .upload-herb input[type="file"] {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            font-family: inherit;
+        }
     </style>
 </head>
 <body>
@@ -159,6 +174,13 @@
         <button onclick="login()">Войти</button>
         <span id="loginStatus" class="status access-guest">● ГОСТЬ (ограниченный доступ)</span>
         <button id="logoutBtn" class="hidden" onclick="logout()">Выйти</button>
+    </div>
+
+    <!-- Панель загрузки герба (для печатной формы) -->
+    <div class="upload-herb">
+        <label>Загрузить герб (для печатной формы):</label>
+        <input type="file" id="herbUpload" accept="image/*" onchange="updateHerb()">
+        <span style="color:var(--text-secondary); font-size:0.8em;">(по умолчанию используется символ)</span>
     </div>
 
     <div id="app">
@@ -201,6 +223,9 @@
     };
     let currentUser = null;
     let dela = [];
+
+    // Хранение загруженного герба (base64)
+    let herbImage = null;
 
     // Демо-данные
     const demoNames = [
@@ -351,7 +376,6 @@
                 <option ${d.status==='Дискредитирован'?'selected':''}>Дискредитирован</option>
             </select></div>
         `;
-        // Добавляем кнопку сохранения
         const saveBtn = document.createElement('button');
         saveBtn.className = 'gost-button';
         saveBtn.textContent = 'Сохранить изменения';
@@ -452,6 +476,20 @@
         closeAddModal();
     }
 
+    // Функция загрузки герба
+    function updateHerb() {
+        const fileInput = document.getElementById('herbUpload');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                herbImage = e.target.result;
+                alert('Герб загружен. Он будет использован в печатной форме.');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     // ================== УЛУЧШЕННАЯ ПЕЧАТНАЯ ФОРМА (по образцу приказа) ==================
     function printDelo() {
         const d = dela.find(x => x.id === currentDeloId);
@@ -459,19 +497,26 @@
 
         // Определяем гриф секретности
         let grif = '';
-        let grifClass = '';
         switch (d.dop) {
-            case 'ДСП': grif = 'Для служебного пользования'; grifClass = 'dsp'; break;
-            case 'Секретно': grif = 'СЕКРЕТНО'; grifClass = 'secret'; break;
-            case 'Сов. секретно': grif = 'СОВЕРШЕННО СЕКРЕТНО'; grifClass = 'topsecret'; break;
-            case 'ОВ': grif = 'ОСОБОЙ ВАЖНОСТИ'; grifClass = 'ov'; break;
-            default: grif = 'ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ'; grifClass = 'dsp';
+            case 'ДСП': grif = 'Для служебного пользования'; break;
+            case 'Секретно': grif = 'СЕКРЕТНО'; break;
+            case 'Сов. секретно': grif = 'СОВЕРШЕННО СЕКРЕТНО'; break;
+            case 'ОВ': grif = 'ОСОБОЙ ВАЖНОСТИ'; break;
+            default: grif = 'ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ';
         }
 
-        // Генерируем исходящий номер (на основе дела и даты)
+        // Исходящий номер
         const now = new Date();
         const dateStr = `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`;
-        const outNum = `002-П(ОТ)/${d.id}`; // пример
+        const outNum = `002-П(ОТ)/${d.id}`;
+
+        // Герб – используем загруженное изображение или символ
+        let herbHtml = '';
+        if (herbImage) {
+            herbHtml = `<img src="${herbImage}" style="width:50px; height:auto; border:2px solid #222; border-radius:4px; background:white; padding:2px;" alt="Герб">`;
+        } else {
+            herbHtml = `<div style="width:50px; height:60px; border:2px solid #222; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:2.2em; background:white; color:#2d2d2d; font-weight:bold; line-height:1.2; text-align:center; padding:2px;">&#9881;</div>`;
+        }
 
         const win = window.open('', '_blank', 'width=900,height=1100');
         const html = `<!DOCTYPE html>
@@ -487,7 +532,7 @@
     }
     .sheet {
         width: 210mm; min-height: 297mm;
-        background: #fdfcf9;
+        background: #ffffff; /* чисто белый фон */
         border: 1px solid #222;
         padding: 15mm 18mm 20mm 18mm;
         position: relative;
@@ -538,7 +583,7 @@
         align-items: center;
         justify-content: center;
         font-size: 2.2em;
-        background: #faf7f0;
+        background: white;
         color: #2d2d2d;
         font-weight: bold;
         line-height: 1.2;
@@ -687,7 +732,9 @@
 
     <!-- Верхний левый угол -->
     <div class="header-left">
-        <div class="gerb">&#9881;</div>
+        <div class="gerb">
+            ${herbImage ? `<img src="${herbImage}" style="width:100%; height:auto; max-height:60px; border-radius:2px;" alt="Герб">` : '&#9881;'}
+        </div>
         <div class="org-info">
             <div class="fsb">ФЕДЕРАЛЬНАЯ СЛУЖБА БЕЗОПАСНОСТИ</div>
             <div class="ross">РОССИЙСКОЙ ФЕДЕРАЦИИ (ФСБ России)</div>
