@@ -61,12 +61,11 @@
             letter-spacing: 2px;
         }
         .login-panel {
-            text-align: right;
-            margin-bottom: 25px;
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            margin-bottom: 25px;
         }
         .login-panel input {
             background: var(--bg);
@@ -76,7 +75,7 @@
             font-family: inherit;
             font-size: 0.9em;
             outline: none;
-            width: 180px;
+            width: 150px;
             border-radius: 2px;
         }
         .login-panel input:focus {
@@ -300,7 +299,8 @@
     </header>
 
     <div class="login-panel">
-        <input type="password" id="passInput" placeholder="Код доступа УСБ">
+        <input type="text" id="loginInput" placeholder="Логин">
+        <input type="password" id="passInput" placeholder="Пароль">
         <button onclick="login()">Войти</button>
         <span id="loginStatus" class="status access-guest">● ГОСТЬ (ограниченный доступ)</span>
         <button id="logoutBtn" class="hidden" onclick="logout()">Выйти</button>
@@ -345,9 +345,16 @@
 </div>
 
 <script>
-    const USB_PASSWORD = "Агат2026";
-    let isUSB = false;
-    let currentDeloId = null;
+    // ---- Учётные данные сотрудников УСБ ----
+    const USERS = {
+        'admin': { password: 'admin123', role: 'Начальник УСБ', level: 5 },
+        'zam': { password: 'zam123', role: 'Зам. начальника УСБ', level: 4 },
+        'stoper': { password: 'stoper123', role: 'Старший оперуполномоченный', level: 3 },
+        'oper': { password: 'oper123', role: 'Оперуполномоченный', level: 2 },
+        'mloper': { password: 'mloper123', role: 'Младший оперуполномоченный', level: 1 }
+    };
+
+    let currentUser = null; // { login, role, level }
     let dela = [];
 
     const demoNames = [
@@ -356,6 +363,13 @@
         {id:'003', alias:'Заря', name:'Котова Е.Н.', birth:1990, dolz:'Оперуполномоченный', dop:'Секретно', status:'Дискредитирован', notes:'Финансовые нарушения.', kompromat:'Выписка со счетов.', resolution:'Отстранить от оперативной работы.'}
     ];
 
+    // ---- Функции прав доступа ----
+    function isLoggedIn() { return currentUser !== null; }
+    function canAdd() { return isLoggedIn() && currentUser.level >= 3; }   // Старший опер и выше
+    function canEdit() { return isLoggedIn() && currentUser.level >= 2; } // Опер и выше
+    function canDelete() { return isLoggedIn() && currentUser.level >= 4; } // Зам. начальника и выше
+
+    // ---- Работа с данными ----
     function loadDela() {
         const stored = localStorage.getItem('delaUSB');
         if (stored) {
@@ -394,7 +408,23 @@
             `;
             tbody.appendChild(tr);
         });
+        updateUIBasedOnRole();
     }
+
+    function updateUIBasedOnRole() {
+        const addBtn = document.getElementById('addBtn');
+        if (canAdd()) {
+            addBtn.classList.remove('hidden');
+        } else {
+            addBtn.classList.add('hidden');
+        }
+        // Обновим кнопки в модальном окне, если оно открыто
+        if (currentDeloId && document.getElementById('modalDela').style.display === 'block') {
+            refreshModalEditButtons();
+        }
+    }
+
+    let currentDeloId = null;
 
     function openDelo(id) {
         const delo = dela.find(d => d.id === id);
@@ -413,17 +443,29 @@
             <div class="field"><label>Компромат:</label><span>${delo.kompromat || '—'}</span></div>
             <div class="field"><label>Резолюция УСБ:</label><span>${delo.resolution || 'Без замечаний.'}</span></div>
         `;
+        document.getElementById('modalDela').style.display = 'block';
+        refreshModalEditButtons();
+    }
+
+    function refreshModalEditButtons() {
         const editSection = document.getElementById('modalEditSection');
-        if (isUSB) {
-            editSection.innerHTML = `
-                <button class="gost-button" onclick="enableEditMode()">✎ Редактировать</button>
-                <button class="gost-button" style="background:#5a5552; border-color:#5a5552;" onclick="deleteDelo()">Удалить</button>
-            `;
+        if (!isLoggedIn()) {
+            editSection.classList.add('hidden');
+            return;
+        }
+        let html = '';
+        if (canEdit()) {
+            html += `<button class="gost-button" onclick="enableEditMode()">✎ Редактировать</button>`;
+        }
+        if (canDelete()) {
+            html += `<button class="gost-button" style="background:#5a5552; border-color:#5a5552;" onclick="deleteDelo()">Удалить</button>`;
+        }
+        if (html) {
+            editSection.innerHTML = html;
             editSection.classList.remove('hidden');
         } else {
             editSection.classList.add('hidden');
         }
-        document.getElementById('modalDela').style.display = 'block';
     }
 
     function closeModal() {
@@ -432,7 +474,7 @@
     }
 
     function enableEditMode() {
-        if (!isUSB || !currentDeloId) return;
+        if (!canEdit() || !currentDeloId) return;
         const delo = dela.find(d => d.id === currentDeloId);
         if (!delo) return;
         const body = document.getElementById('modalBody');
@@ -458,7 +500,7 @@
     }
 
     function saveEdit() {
-        if (!isUSB || !currentDeloId) return;
+        if (!canEdit() || !currentDeloId) return;
         const delo = dela.find(d => d.id === currentDeloId);
         if (!delo) return;
         const nameEl = document.getElementById('editName');
@@ -479,7 +521,7 @@
     }
 
     function deleteDelo() {
-        if (!isUSB || !currentDeloId) return;
+        if (!canDelete() || !currentDeloId) return;
         if (!confirm('Удалить личное дело №' + currentDeloId + ' безвозвратно?')) return;
         dela = dela.filter(d => d.id !== currentDeloId);
         saveDela();
@@ -488,7 +530,7 @@
     }
 
     function openAddModal() {
-        if (!isUSB) return;
+        if (!canAdd()) return;
         document.getElementById('addForm').innerHTML = `
             <div class="field"><label>Номер дела:</label><input id="newId" placeholder="001"></div>
             <div class="field"><label>Псевдоним:</label><input id="newAlias" placeholder="Агат"></div>
@@ -513,6 +555,7 @@
     }
 
     function createDelo() {
+        if (!canAdd()) return;
         const id = document.getElementById('newId').value.trim();
         if (!id) { alert('Введите номер дела'); return; }
         if (dela.find(d => d.id === id)) { alert('Дело с таким номером уже существует'); return; }
@@ -534,38 +577,47 @@
         closeAddModal();
     }
 
+    // ---- Аутентификация ----
     function login() {
+        const login = document.getElementById('loginInput').value.trim();
         const pass = document.getElementById('passInput').value.trim();
-        if (pass === USB_PASSWORD) {
-            isUSB = true;
-            document.getElementById('loginStatus').textContent = '● УСБ (полный доступ)';
+        if (USERS[login] && USERS[login].password === pass) {
+            currentUser = {
+                login: login,
+                role: USERS[login].role,
+                level: USERS[login].level
+            };
+            document.getElementById('loginStatus').textContent = `● ${currentUser.role} (доступ)`;
             document.getElementById('loginStatus').className = 'status access-usb';
             document.getElementById('logoutBtn').classList.remove('hidden');
-            document.getElementById('addBtn').classList.remove('hidden');
+            document.getElementById('loginInput').value = '';
             document.getElementById('passInput').value = '';
-            renderTable();
+            updateUIBasedOnRole();
         } else {
-            alert('Неверный код доступа');
+            alert('Неверный логин или пароль');
         }
     }
 
     function logout() {
-        isUSB = false;
+        currentUser = null;
         document.getElementById('loginStatus').textContent = '● ГОСТЬ (ограниченный доступ)';
         document.getElementById('loginStatus').className = 'status access-guest';
         document.getElementById('logoutBtn').classList.add('hidden');
         document.getElementById('addBtn').classList.add('hidden');
+        document.getElementById('loginInput').value = '';
         document.getElementById('passInput').value = '';
         closeModal();
         closeAddModal();
-        renderTable();
+        updateUIBasedOnRole();
     }
 
+    // Закрытие модальных окон по клику вне области
     window.onclick = function(event) {
         if (event.target === document.getElementById('modalDela')) closeModal();
         if (event.target === document.getElementById('addModal')) closeAddModal();
     }
 
+    // Инициализация
     loadDela();
     renderTable();
 </script>
